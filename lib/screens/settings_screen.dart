@@ -86,7 +86,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         const SizedBox(height: 4),
         Text(
-          'Choose your own reminder times.',
+          'Choose when SkinFlow reminds you to care for your skin.',
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
@@ -166,7 +166,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: Padding(
             padding: EdgeInsets.all(16),
             child: Text(
-              'KiLife stores your settings and completion history only on this phone. No account or cloud service is required.',
+              'Reminder times and routine history stay on this device. No account or cloud service is required.',
             ),
           ),
         ),
