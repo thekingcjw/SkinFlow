@@ -44,6 +44,8 @@ class PreferencesService {
   static const String _followUpEnabledKey = 'settings_follow_up_enabled';
   static const String _morningTimeKey = 'settings_morning_time';
   static const String _eveningTimeKey = 'settings_evening_time';
+  static const String _historyMigrationKey =
+      'skinflow_v02_completion_history_migrated';
 
   Future<AppSettings> loadSettings() async {
     return AppSettings(
@@ -68,7 +70,7 @@ class PreferencesService {
   }
 
   Future<bool> isComplete(DateTime date, String period) async {
-    return await _prefs.getBool(_completionKey(date, period)) ?? false;
+    return await _prefs.getBool(completionKey(date, period)) ?? false;
   }
 
   Future<void> setComplete(
@@ -76,7 +78,7 @@ class PreferencesService {
     String period,
     bool isComplete,
   ) async {
-    await _prefs.setBool(_completionKey(date, period), isComplete);
+    await _prefs.setBool(completionKey(date, period), isComplete);
   }
 
   Future<int> completedCountForWeek(DateTime date) async {
@@ -90,7 +92,24 @@ class PreferencesService {
     return count;
   }
 
-  String _completionKey(DateTime date, String period) {
+  Future<bool> isHistoryMigrationComplete() async =>
+      await _prefs.getBool(_historyMigrationKey) ?? false;
+
+  Future<void> markHistoryMigrationComplete() =>
+      _prefs.setBool(_historyMigrationKey, true);
+
+  Future<Map<String, bool>> legacyCompletionValues() async {
+    final keys = await _prefs.getKeys();
+    final completionKeys = keys.where((key) => key.startsWith('completion_'));
+    final result = <String, bool>{};
+    for (final key in completionKeys) {
+      final value = await _prefs.getBool(key);
+      if (value != null) result[key] = value;
+    }
+    return result;
+  }
+
+  String completionKey(DateTime date, String period) {
     final y = date.year.toString().padLeft(4, '0');
     final m = date.month.toString().padLeft(2, '0');
     final d = date.day.toString().padLeft(2, '0');
