@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 
+import 'screens/progress_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/today_screen.dart';
-import 'screens/week_screen.dart';
+import 'services/completion_repository.dart';
 import 'services/notification_service.dart';
 import 'services/preferences_service.dart';
+import 'theme/skinflow_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await CompletionRepository.instance.initialize();
   await NotificationService.instance.initialize();
   final settings = await PreferencesService.instance.loadSettings();
   await NotificationService.instance.reschedule(settings);
@@ -19,23 +22,11 @@ class SkinFlowApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const seed = Color(0xFF7C5CFC);
     return MaterialApp(
       title: 'SkinFlow',
       debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.dark,
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: seed,
-          brightness: Brightness.dark,
-        ),
-        useMaterial3: true,
-        scaffoldBackgroundColor: const Color(0xFF0E0F14),
-        cardTheme: const CardThemeData(
-          elevation: 0,
-          margin: EdgeInsets.zero,
-        ),
-      ),
+      darkTheme: buildSkinFlowTheme(),
       home: const MainShell(),
     );
   }
@@ -53,7 +44,7 @@ class _MainShellState extends State<MainShell> {
 
   static const _screens = <Widget>[
     TodayScreen(),
-    WeekScreen(),
+    ProgressScreen(),
     SettingsScreen(),
   ];
 
@@ -61,12 +52,11 @@ class _MainShellState extends State<MainShell> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Row(
-          children: <Widget>[
-            Icon(Icons.auto_awesome),
-            SizedBox(width: 8),
-            Text('SkinFlow'),
-          ],
+        leading: const Icon(Icons.auto_awesome_outlined),
+        titleSpacing: 0,
+        title: const Text(
+          'SkinFlow',
+          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w400),
         ),
       ),
       body: IndexedStack(index: _index, children: _screens),
@@ -80,9 +70,9 @@ class _MainShellState extends State<MainShell> {
             label: 'Today',
           ),
           NavigationDestination(
-            icon: Icon(Icons.calendar_view_week_outlined),
-            selectedIcon: Icon(Icons.calendar_view_week),
-            label: 'Week',
+            icon: Icon(Icons.stars_outlined),
+            selectedIcon: Icon(Icons.stars),
+            label: 'Progress',
           ),
           NavigationDestination(
             icon: Icon(Icons.settings_outlined),
