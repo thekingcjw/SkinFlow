@@ -63,7 +63,7 @@ jobs:
         run: flutter pub get
 
       - name: Generate Drift code
-        run: dart run build_runner build --delete-conflicting-outputs
+        run: dart run build_runner build --force-jit --delete-conflicting-outputs
 
       - name: Analyze project
         run: flutter analyze
