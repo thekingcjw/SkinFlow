@@ -11,17 +11,17 @@ Future<void> main() async {
   await NotificationService.instance.initialize();
   final settings = await PreferencesService.instance.loadSettings();
   await NotificationService.instance.reschedule(settings);
-  runApp(const KiLifeApp());
+  runApp(const SkinFlowApp());
 }
 
-class KiLifeApp extends StatelessWidget {
-  const KiLifeApp({super.key});
+class SkinFlowApp extends StatelessWidget {
+  const SkinFlowApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     const seed = Color(0xFF7C5CFC);
     return MaterialApp(
-      title: 'KiLife',
+      title: 'SkinFlow',
       debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.dark,
       darkTheme: ThemeData(
@@ -65,7 +65,7 @@ class _MainShellState extends State<MainShell> {
           children: <Widget>[
             Icon(Icons.auto_awesome),
             SizedBox(width: 8),
-            Text('KiLife'),
+            Text('SkinFlow'),
           ],
         ),
       ),
