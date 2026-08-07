@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'screens/first_run_screen.dart';
 import 'screens/progress_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/today_screen.dart';
@@ -10,15 +11,34 @@ import 'theme/skinflow_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  final preferences = PreferencesService.instance;
+  final showFirstRun = await preferences.shouldShowFirstRun();
   await CompletionRepository.instance.initialize();
   await NotificationService.instance.initialize();
-  final settings = await PreferencesService.instance.loadSettings();
+  final settings = await preferences.loadSettings();
   await NotificationService.instance.reschedule(settings);
-  runApp(const SkinFlowApp());
+
+  runApp(SkinFlowApp(showFirstRun: showFirstRun));
 }
 
-class SkinFlowApp extends StatelessWidget {
-  const SkinFlowApp({super.key});
+class SkinFlowApp extends StatefulWidget {
+  const SkinFlowApp({super.key, required this.showFirstRun});
+
+  final bool showFirstRun;
+
+  @override
+  State<SkinFlowApp> createState() => _SkinFlowAppState();
+}
+
+class _SkinFlowAppState extends State<SkinFlowApp> {
+  late bool _showFirstRun;
+
+  @override
+  void initState() {
+    super.initState();
+    _showFirstRun = widget.showFirstRun;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +47,11 @@ class SkinFlowApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.dark,
       darkTheme: buildSkinFlowTheme(),
-      home: const MainShell(),
+      home: _showFirstRun
+          ? FirstRunScreen(
+              onFinished: () => setState(() => _showFirstRun = false),
+            )
+          : const MainShell(),
     );
   }
 }
