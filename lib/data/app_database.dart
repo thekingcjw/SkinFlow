@@ -101,6 +101,15 @@ final class AppDatabase extends _$AppDatabase {
         .get();
   }
 
+  Stream<List<CompletionEntry>> watchAllEntries() {
+    return (select(completionEntries)
+          ..orderBy(<OrderClauseGenerator<CompletionEntries>>[
+            (row) => OrderingTerm.asc(row.day),
+            (row) => OrderingTerm.asc(row.period),
+          ]))
+        .watch();
+  }
+
   static DateTime normalizeDay(DateTime value) =>
       DateTime(value.year, value.month, value.day);
 
