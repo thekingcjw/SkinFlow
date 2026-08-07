@@ -31,7 +31,12 @@ class StreakMetrics {
   final int fullDaysThisMonth;
   final int nextMilestone;
 
-  int get daysToMilestone => (nextMilestone - current).clamp(0, nextMilestone);
+  int get daysToMilestone {
+    final remaining = nextMilestone - current;
+    if (remaining < 0) return 0;
+    if (remaining > nextMilestone) return nextMilestone;
+    return remaining;
+  }
 }
 
 DateTime dayOnly(DateTime value) => DateTime(value.year, value.month, value.day);
@@ -106,7 +111,7 @@ StreakMetrics calculateStreakMetrics(
   var run = 0;
   DateTime? previous;
   for (final day in fullDays) {
-    if (previous != null && day.difference(previous).inDays == 1) {
+    if (previous != null && _dayOrdinal(day) - _dayOrdinal(previous) == 1) {
       run++;
     } else {
       run = 1;
@@ -124,10 +129,13 @@ StreakMetrics calculateStreakMetrics(
       .length;
 
   const milestones = <int>[3, 7, 14, 30, 60, 90, 180, 365];
-  final nextMilestone = milestones.cast<int?>().firstWhere(
-        (milestone) => milestone! > current,
-        orElse: () => current + 30,
-      )!;
+  var nextMilestone = current + 30;
+  for (final milestone in milestones) {
+    if (milestone > current) {
+      nextMilestone = milestone;
+      break;
+    }
+  }
 
   return StreakMetrics(
     current: current,
@@ -136,3 +144,7 @@ StreakMetrics calculateStreakMetrics(
     nextMilestone: nextMilestone,
   );
 }
+
+int _dayOrdinal(DateTime date) =>
+    DateTime.utc(date.year, date.month, date.day).millisecondsSinceEpoch ~/
+    Duration.millisecondsPerDay;
