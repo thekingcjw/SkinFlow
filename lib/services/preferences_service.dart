@@ -46,6 +46,7 @@ class PreferencesService {
   static const String _eveningTimeKey = 'settings_evening_time';
   static const String _historyMigrationKey =
       'skinflow_v02_completion_history_migrated';
+  static const String _firstRunCompleteKey = 'skinflow_first_run_complete';
 
   Future<AppSettings> loadSettings() async {
     return AppSettings(
@@ -91,6 +92,23 @@ class PreferencesService {
     }
     return count;
   }
+
+  Future<bool> shouldShowFirstRun() async {
+    if (await _prefs.getBool(_firstRunCompleteKey) ?? false) return false;
+
+    final keys = await _prefs.getKeys();
+    final hasLegacyAppData = keys.any(
+      (key) => key.startsWith('completion_') || key.startsWith('settings_'),
+    );
+    if (hasLegacyAppData) {
+      await markFirstRunComplete();
+      return false;
+    }
+    return true;
+  }
+
+  Future<void> markFirstRunComplete() =>
+      _prefs.setBool(_firstRunCompleteKey, true);
 
   Future<bool> isHistoryMigrationComplete() async =>
       await _prefs.getBool(_historyMigrationKey) ?? false;
