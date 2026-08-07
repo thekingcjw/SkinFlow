@@ -65,7 +65,8 @@ class _TodayScreenState extends State<TodayScreen> {
       } else {
         _eveningComplete = value;
       }
-      _weeklyCompleted = (_weeklyCompleted + (value ? 1 : -1)).clamp(0, 14);
+      _weeklyCompleted =
+          (_weeklyCompleted + (value ? 1 : -1)).clamp(0, 14).toInt();
     });
 
     try {
