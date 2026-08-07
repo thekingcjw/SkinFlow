@@ -1,5 +1,4 @@
 import '../data/app_database.dart';
-import 'preferences_service.dart';
 
 class CompletionRecord {
   const CompletionRecord({
@@ -76,48 +75,28 @@ class CompletionRepository {
   Future<List<CompletionRecord>> entriesBetween(
     DateTime start,
     DateTime end,
-  ) async {
-    final rows = await _database.entriesBetween(start, end);
-    return rows
-        .map(
-          (row) => CompletionRecord(
-            day: row.day,
-            period: row.period,
-            complete: row.complete,
-          ),
-        )
-        .toList(growable: false);
-  }
+  ) async => _mapRows(await _database.entriesBetween(start, end));
 
   Stream<List<CompletionRecord>> watchEntriesBetween(
     DateTime start,
     DateTime end,
-  ) {
-    return _database.watchEntriesBetween(start, end).map(
-          (rows) => rows
-              .map(
-                (row) => CompletionRecord(
-                  day: row.day,
-                  period: row.period,
-                  complete: row.complete,
-                ),
-              )
-              .toList(growable: false),
-        );
-  }
+  ) => _database.watchEntriesBetween(start, end).map(_mapRows);
 
-  Future<List<CompletionRecord>> allEntries() async {
-    final rows = await _database.allEntries();
-    return rows
-        .map(
-          (row) => CompletionRecord(
-            day: row.day,
-            period: row.period,
-            complete: row.complete,
-          ),
-        )
-        .toList(growable: false);
-  }
+  Future<List<CompletionRecord>> allEntries() async =>
+      _mapRows(await _database.allEntries());
+
+  Stream<List<CompletionRecord>> watchAllEntries() =>
+      _database.watchAllEntries().map(_mapRows);
+
+  static List<CompletionRecord> _mapRows(List<CompletionEntry> rows) => rows
+      .map(
+        (row) => CompletionRecord(
+          day: row.day,
+          period: row.period,
+          complete: row.complete,
+        ),
+      )
+      .toList(growable: false);
 
   static List<LegacyCompletionRecord> parseLegacyCompletionValues(
     Map<String, bool> values,
