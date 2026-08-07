@@ -1,4 +1,5 @@
 import '../data/app_database.dart';
+import 'preferences_service.dart';
 
 class CompletionRecord {
   const CompletionRecord({
