@@ -37,17 +37,20 @@ if "coreLibraryDesugaring(\"com.android.tools:desugar_jdk_libs:2.1.4\")" not in 
         text += '\n\ndependencies {\n    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")\n}\n'
 
 # Flutter's generated release build uses the debug signing key. Keep that as a
-# CI fallback, but support a permanent SkinFlow release key whenever the four
-# SKINFLOW_* signing environment variables are provided.
+# local fallback, but use a protected properties file for permanent release
+# signing so passwords never need to persist in the CI job environment.
 if 'create("skinflowRelease")' not in text:
     signing_block = """signingConfigs {
-        val skinflowKeystorePath = System.getenv("SKINFLOW_KEYSTORE_PATH")
-        if (!skinflowKeystorePath.isNullOrBlank()) {
+        val skinflowSigningPropertiesPath = System.getenv("SKINFLOW_SIGNING_PROPERTIES_PATH")
+        if (!skinflowSigningPropertiesPath.isNullOrBlank()) {
+            val skinflowSigningProperties = java.util.Properties().apply {
+                file(skinflowSigningPropertiesPath!!).inputStream().use { load(it) }
+            }
             create("skinflowRelease") {
-                storeFile = file(skinflowKeystorePath!!)
-                storePassword = System.getenv("SKINFLOW_KEYSTORE_PASSWORD")
-                keyAlias = System.getenv("SKINFLOW_KEY_ALIAS")
-                keyPassword = System.getenv("SKINFLOW_KEY_PASSWORD")
+                storeFile = file(skinflowSigningProperties.getProperty("storeFile"))
+                storePassword = skinflowSigningProperties.getProperty("storePassword")
+                keyAlias = skinflowSigningProperties.getProperty("keyAlias")
+                keyPassword = skinflowSigningProperties.getProperty("keyPassword")
             }
         }
     }
@@ -55,7 +58,7 @@ if 'create("skinflowRelease")' not in text:
     buildTypes {"""
     text = text.replace("buildTypes {", signing_block, 1)
 
-release_signing = """signingConfig = if (System.getenv("SKINFLOW_KEYSTORE_PATH").isNullOrBlank()) {
+release_signing = """signingConfig = if (System.getenv("SKINFLOW_SIGNING_PROPERTIES_PATH").isNullOrBlank()) {
                 signingConfigs.getByName("debug")
             } else {
                 signingConfigs.getByName("skinflowRelease")
@@ -71,7 +74,7 @@ manifest_target.parent.mkdir(parents=True, exist_ok=True)
 shutil.copy2(manifest_source, manifest_target)
 print(f"Patched {app_gradle}")
 print(f"Installed {manifest_target}")
-if os.getenv("SKINFLOW_KEYSTORE_PATH"):
+if os.getenv("SKINFLOW_SIGNING_PROPERTIES_PATH"):
     print("SkinFlow permanent release signing enabled")
 else:
-    print("SkinFlow permanent release signing not configured; using CI fallback key")
+    print("SkinFlow permanent release signing not configured; using local fallback key")
