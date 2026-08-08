@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../services/notification_service.dart';
 import '../services/preferences_service.dart';
 import '../theme/skinflow_theme.dart';
+import 'history_repair_screen.dart';
 
 enum _NotificationFeedback { none, granted, denied }
 
@@ -76,6 +77,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await _notifications.showTestNotification();
     if (!mounted) return;
     setState(() => _feedback = _NotificationFeedback.granted);
+  }
+
+  void _openHistoryRepair() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => const HistoryRepairScreen(),
+      ),
+    );
   }
 
   @override
@@ -173,6 +182,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
           onEnabledChanged: settings.eveningEnabled
               ? (value) => _update(settings.copyWith(followUpEnabled: value))
               : null,
+        ),
+        const SizedBox(height: 14),
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 10),
+          decoration: BoxDecoration(
+            color: SkinFlowColors.card,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 6,
+            ),
+            leading: const Icon(Icons.history_outlined),
+            title: const Text(
+              'Edit routine history',
+              style: TextStyle(color: SkinFlowColors.primaryText),
+            ),
+            subtitle: const Text(
+              'Restore recent AM/PM completions or correct a past day.',
+              style: TextStyle(
+                color: SkinFlowColors.secondaryText,
+                fontSize: 13,
+                height: 1.3,
+              ),
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: _openHistoryRepair,
+          ),
         ),
         const SizedBox(height: 14),
         Container(
