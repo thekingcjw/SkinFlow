@@ -61,22 +61,37 @@ jobs:
           echo "::add-mask::$STORE_PASSWORD"
           echo "::add-mask::$KEY_PASSWORD"
 
-          # Passwords may rotate; this exact keystore and certificate remain the release identity.
-          printf '%s' "$KEYSTORE_B64" | base64 --decode > "$RUNNER_TEMP/skinflow-release.jks"
+          KEYSTORE_PATH="$RUNNER_TEMP/skinflow-release.jks"
+          SIGNING_PROPERTIES="$RUNNER_TEMP/skinflow-signing.properties"
+          printf '%s' "$KEYSTORE_B64" | base64 --decode > "$KEYSTORE_PATH"
 
-          echo 'aa6b76ce6a584037921d6db55157c45e8ecac8d82f9808bec997e61316137ba5  '"$RUNNER_TEMP/skinflow-release.jks" | sha256sum -c -
+          echo '28e0ff1a1169e319a1b19b23668e46953bda53dd5894eebb526efd20d43d286d  '"$KEYSTORE_PATH" | sha256sum -c -
 
           KEYSTORE_INFO="$(keytool -list -v \
-            -keystore "$RUNNER_TEMP/skinflow-release.jks" \
+            -keystore "$KEYSTORE_PATH" \
             -storepass "$STORE_PASSWORD")"
           echo "$KEYSTORE_INFO" | grep -F 'Alias name: skinflow-release'
           echo "$KEYSTORE_INFO" | grep -F 'SHA256: AD:3E:C4:43:3C:24:73:5E:F4:25:EF:81:99:F2:08:8B:93:77:BF:83:0D:A9:56:65:C9:11:7A:AD:3F:A1:85:92'
 
+          # Validate the private-key password without persisting it in the job environment.
+          keytool -certreq \
+            -alias skinflow-release \
+            -keystore "$KEYSTORE_PATH" \
+            -storepass "$STORE_PASSWORD" \
+            -keypass "$KEY_PASSWORD" \
+            -file "$RUNNER_TEMP/skinflow-signing-check.csr" >/dev/null
+
           {
-            echo "SKINFLOW_KEYSTORE_PATH=$RUNNER_TEMP/skinflow-release.jks"
-            echo "SKINFLOW_KEYSTORE_PASSWORD=$STORE_PASSWORD"
-            echo "SKINFLOW_KEY_ALIAS=skinflow-release"
-            echo "SKINFLOW_KEY_PASSWORD=$KEY_PASSWORD"
+            printf 'storeFile=%s\n' "$KEYSTORE_PATH"
+            printf 'storePassword=%s\n' "$STORE_PASSWORD"
+            printf 'keyAlias=skinflow-release\n'
+            printf 'keyPassword=%s\n' "$KEY_PASSWORD"
+          } > "$SIGNING_PROPERTIES"
+          chmod 600 "$KEYSTORE_PATH" "$SIGNING_PROPERTIES"
+
+          {
+            echo "SKINFLOW_SIGNING_PROPERTIES_PATH=$SIGNING_PROPERTIES"
+            echo "SKINFLOW_CERT_SHA256=AD:3E:C4:43:3C:24:73:5E:F4:25:EF:81:99:F2:08:8B:93:77:BF:83:0D:A9:56:65:C9:11:7A:AD:3F:A1:85:92"
           } >> "$GITHUB_ENV"
 
       - name: Patch Android project
@@ -96,7 +111,7 @@ jobs:
 
       - name: Require permanent release signing
         run: |
-          if [ -z "${SKINFLOW_KEYSTORE_PATH:-}" ]; then
+          if [ -z "${SKINFLOW_SIGNING_PROPERTIES_PATH:-}" ]; then
             echo "::error::Permanent SkinFlow release signing is not configured."
             exit 1
           fi
@@ -109,6 +124,20 @@ jobs:
           CERT_OUTPUT="$($ANDROID_HOME/build-tools/36.0.0/apksigner verify --print-certs build/app/outputs/flutter-apk/app-release.apk)"
           echo "$CERT_OUTPUT"
           echo "$CERT_OUTPUT" | grep -Fi 'ad3ec4433c24735ef425ef8199f2088b9377bf830da95665c9117aad3fa18592'
+
+      - name: Verify APK package metadata
+        run: |
+          APK_INFO="$($ANDROID_HOME/build-tools/36.0.0/aapt dump badging build/app/outputs/flutter-apk/app-release.apk | head -n 1)"
+          echo "$APK_INFO"
+          echo "$APK_INFO" | grep -F "name='com.kisama.kilife'"
+          echo "$APK_INFO" | grep -F "versionName='0.2.0'"
+
+      - name: Enable KVM acceleration
+        run: |
+          if [ -e /dev/kvm ]; then
+            sudo chmod 666 /dev/kvm
+            ls -l /dev/kvm
+          fi
 
       - name: Verify clean install and package identity
         uses: reactivecircus/android-emulator-runner@v2
