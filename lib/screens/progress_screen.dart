@@ -98,20 +98,21 @@ class _ProgressScreenState extends State<ProgressScreen> {
             const SizedBox(height: 16),
             Center(
               child: SizedBox(
-                width: 310,
+                width: double.infinity,
                 child: SegmentedButton<_ProgressView>(
+                  showSelectedIcon: false,
                   segments: const <ButtonSegment<_ProgressView>>[
                     ButtonSegment(
                       value: _ProgressView.calendar,
-                      label: Text('Calendar'),
+                      label: Text('Calendar', maxLines: 1, softWrap: false),
                     ),
                     ButtonSegment(
                       value: _ProgressView.week,
-                      label: Text('Week'),
+                      label: Text('Week', maxLines: 1, softWrap: false),
                     ),
                     ButtonSegment(
                       value: _ProgressView.streak,
-                      label: Text('Streak'),
+                      label: Text('Streak', maxLines: 1, softWrap: false),
                     ),
                   ],
                   selected: <_ProgressView>{_view},
