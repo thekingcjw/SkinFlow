@@ -12,9 +12,9 @@ permissions:
 
 jobs:
   build:
-    name: Build, test, and verify SkinFlow upgrade
+    name: Build, test, and verify SkinFlow release
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 35
 
     steps:
       - name: Check out source
@@ -42,22 +42,29 @@ jobs:
           flutter-version: '3.38.1'
           cache: true
 
-      - name: Build v0.1.0 baseline for upgrade test
-        run: |
-          git worktree add --detach /tmp/skinflow-v01 origin/main
-          cd /tmp/skinflow-v01
-          flutter create . --platforms=android --org com.kisama --project-name kilife
-          python3 tool/patch_android.py
-          rm -f test/widget_test.dart
-          flutter pub get
-          flutter build apk --release
-          cp build/app/outputs/flutter-apk/app-release.apk /tmp/SkinFlow-v0.1.0-baseline.apk
-
       - name: Generate Android project wrapper
         run: |
           flutter create . --platforms=android --org com.kisama --project-name kilife
-          python3 tool/patch_android.py
           rm -f test/widget_test.dart
+
+      - name: Configure permanent SkinFlow signing
+        if: ${{ secrets.SKINFLOW_KEYSTORE_B64 != '' }}
+        env:
+          KEYSTORE_B64: ${{ secrets.SKINFLOW_KEYSTORE_B64 }}
+          STORE_PASSWORD: ${{ secrets.SKINFLOW_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.SKINFLOW_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.SKINFLOW_KEY_PASSWORD }}
+        run: |
+          echo "$KEYSTORE_B64" | base64 --decode > "$RUNNER_TEMP/skinflow-release.jks"
+          {
+            echo "SKINFLOW_KEYSTORE_PATH=$RUNNER_TEMP/skinflow-release.jks"
+            echo "SKINFLOW_KEYSTORE_PASSWORD=$STORE_PASSWORD"
+            echo "SKINFLOW_KEY_ALIAS=$KEY_ALIAS"
+            echo "SKINFLOW_KEY_PASSWORD=$KEY_PASSWORD"
+          } >> "$GITHUB_ENV"
+
+      - name: Patch Android project
+        run: python3 tool/patch_android.py
 
       - name: Install dependencies
         run: flutter pub get
@@ -71,10 +78,23 @@ jobs:
       - name: Run tests
         run: flutter test
 
+      - name: Require permanent release signing
+        run: |
+          if [ -z "${SKINFLOW_KEYSTORE_PATH:-}" ]; then
+            echo "::error::Permanent SkinFlow release signing is not configured. Add the SKINFLOW_KEYSTORE_B64, SKINFLOW_KEYSTORE_PASSWORD, SKINFLOW_KEY_ALIAS, and SKINFLOW_KEY_PASSWORD repository secrets."
+            exit 1
+          fi
+
       - name: Build release APK
         run: flutter build apk --release
 
-      - name: Verify install-over-v0.1.0
+      - name: Verify release certificate
+        run: |
+          CERT_OUTPUT="$($ANDROID_HOME/build-tools/36.0.0/apksigner verify --print-certs build/app/outputs/flutter-apk/app-release.apk)"
+          echo "$CERT_OUTPUT"
+          echo "$CERT_OUTPUT" | grep -Fi 'ad3ec4433c24735ef425ef8199f2088b9377bf830da95665c9117aad3fa18592'
+
+      - name: Verify clean install and package identity
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 35
@@ -82,9 +102,7 @@ jobs:
           profile: pixel_6
           disable-animations: true
           script: |
-            adb install /tmp/SkinFlow-v0.1.0-baseline.apk
-            adb shell dumpsys package com.kisama.kilife | grep -F 'versionName=0.1.0'
-            adb install -r build/app/outputs/flutter-apk/app-release.apk
+            adb install build/app/outputs/flutter-apk/app-release.apk
             adb shell dumpsys package com.kisama.kilife | grep -F 'versionName=0.2.0'
             adb shell pm path com.kisama.kilife
 
