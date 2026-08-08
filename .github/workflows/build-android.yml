@@ -61,6 +61,7 @@ jobs:
           echo "::add-mask::$STORE_PASSWORD"
           echo "::add-mask::$KEY_PASSWORD"
 
+          # Passwords may rotate; this exact keystore and certificate remain the release identity.
           printf '%s' "$KEYSTORE_B64" | base64 --decode > "$RUNNER_TEMP/skinflow-release.jks"
 
           echo 'aa6b76ce6a584037921d6db55157c45e8ecac8d82f9808bec997e61316137ba5  '"$RUNNER_TEMP/skinflow-release.jks" | sha256sum -c -
