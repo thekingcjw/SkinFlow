@@ -68,7 +68,7 @@ class RoutineCard extends StatelessWidget {
             const SizedBox(height: 24),
             for (var index = 0; index < routine.steps.length; index++) ...<Widget>[
               _StepRow(step: routine.steps[index], accent: accent),
-              if (index != routine.steps.length - 1) const SizedBox(height: 8),
+              if (index != routine.steps.length - 1) const SizedBox(height: 12),
             ],
             const SizedBox(height: 24),
             Center(
@@ -110,9 +110,10 @@ class _StepRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 44,
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 52),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           Container(
             width: 36,
@@ -123,14 +124,7 @@ class _StepRow extends StatelessWidget {
               border: Border.all(color: accent),
             ),
             alignment: Alignment.center,
-            child: Text(
-              '•',
-              style: TextStyle(
-                color: accent,
-                fontSize: 18,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
+            child: Icon(step.icon, color: accent, size: 17),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -148,9 +142,10 @@ class _StepRow extends StatelessWidget {
                     height: 1.1,
                   ),
                 ),
+                const SizedBox(height: 2),
                 Text(
                   step.title,
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     color: SkinFlowColors.primaryText,
@@ -158,6 +153,17 @@ class _StepRow extends StatelessWidget {
                     height: 1.25,
                   ),
                 ),
+                if (step.note != null) ...<Widget>[
+                  const SizedBox(height: 2),
+                  Text(
+                    step.note!,
+                    style: const TextStyle(
+                      color: SkinFlowColors.secondaryText,
+                      fontSize: 12,
+                      height: 1.25,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
