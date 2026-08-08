@@ -54,21 +54,22 @@ jobs:
           KEY_PASSWORD: ${{ secrets.SKINFLOW_KEY_PASSWORD }}
         run: |
           if [ -z "$KEYSTORE_B64" ] || [ -z "$STORE_PASSWORD" ] || [ -z "$KEY_PASSWORD" ]; then
-            echo "Permanent SkinFlow signing secrets are not configured yet."
-            exit 0
+            echo "::error::Permanent SkinFlow signing secrets are not configured."
+            exit 1
           fi
 
           echo "::add-mask::$STORE_PASSWORD"
           echo "::add-mask::$KEY_PASSWORD"
 
-          echo "$KEYSTORE_B64" | base64 --decode > "$RUNNER_TEMP/skinflow-release.jks"
+          printf '%s' "$KEYSTORE_B64" | base64 --decode > "$RUNNER_TEMP/skinflow-release.jks"
 
-          # The keystore is generated with one fixed, non-secret alias. Validate it
-          # before Gradle starts so a mistyped repository secret cannot break signing.
-          keytool -list \
+          echo 'aa6b76ce6a584037921d6db55157c45e8ecac8d82f9808bec997e61316137ba5  '"$RUNNER_TEMP/skinflow-release.jks" | sha256sum -c -
+
+          KEYSTORE_INFO="$(keytool -list -v \
             -keystore "$RUNNER_TEMP/skinflow-release.jks" \
-            -storepass "$STORE_PASSWORD" \
-            -alias skinflow-release >/dev/null
+            -storepass "$STORE_PASSWORD")"
+          echo "$KEYSTORE_INFO" | grep -F 'Alias name: skinflow-release'
+          echo "$KEYSTORE_INFO" | grep -F 'SHA256: AD:3E:C4:43:3C:24:73:5E:F4:25:EF:81:99:F2:08:8B:93:77:BF:83:0D:A9:56:65:C9:11:7A:AD:3F:A1:85:92'
 
           {
             echo "SKINFLOW_KEYSTORE_PATH=$RUNNER_TEMP/skinflow-release.jks"
@@ -95,7 +96,7 @@ jobs:
       - name: Require permanent release signing
         run: |
           if [ -z "${SKINFLOW_KEYSTORE_PATH:-}" ]; then
-            echo "::error::Permanent SkinFlow release signing is not configured. Add the SKINFLOW_KEYSTORE_B64, SKINFLOW_KEYSTORE_PASSWORD, and SKINFLOW_KEY_PASSWORD repository secrets."
+            echo "::error::Permanent SkinFlow release signing is not configured."
             exit 1
           fi
 
