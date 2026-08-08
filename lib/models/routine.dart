@@ -22,10 +22,12 @@ class RoutinePlan {
     required this.title,
     required this.description,
     required this.steps,
+    this.typeLabel,
   });
 
   final RoutineKind kind;
   final String title;
+  final String? typeLabel;
   final String description;
   final List<RoutineStep> steps;
 }
