@@ -4,6 +4,7 @@ import 'package:kilife/models/routine.dart';
 
 void main() {
   test('morning routine matches the authoritative four-step order', () {
+    expect(morningRoutine.title, 'Morning routine');
     expect(
       morningRoutine.steps.map((step) => step.title).toList(),
       <String>[
@@ -13,6 +14,16 @@ void main() {
         'Youthscreen SPF 60',
       ],
     );
+  });
+
+  test('all evening plans display the consistent Night routine title', () {
+    for (final routine in <RoutinePlan>[
+      retinalRoutine,
+      exfoliationRoutine,
+      recoveryRoutine,
+    ]) {
+      expect(routine.title, 'Night routine');
+    }
   });
 
   test('recovery routine includes Skin Drip between cleanser and moisturizer', () {
