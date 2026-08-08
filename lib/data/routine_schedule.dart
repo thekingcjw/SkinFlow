@@ -37,7 +37,8 @@ const RoutinePlan morningRoutine = RoutinePlan(
 const RoutinePlan retinalRoutine = RoutinePlan(
   kind: RoutineKind.retinal,
   title: 'Night routine',
-  description: 'Retinal night. Keep the routine simple.',
+  typeLabel: 'Retinal',
+  description: 'Skin-renewal night. Keep the routine simple.',
   steps: <RoutineStep>[
     RoutineStep(
       title: 'Superfood Antioxidant Cleanser',
@@ -63,7 +64,8 @@ const RoutinePlan retinalRoutine = RoutinePlan(
 const RoutinePlan exfoliationRoutine = RoutinePlan(
   kind: RoutineKind.exfoliation,
   title: 'Night routine',
-  description: 'Exfoliation + Dream Mask. Exfoliate gently, then finish with extra hydration.',
+  typeLabel: 'Exfoliation + Dream Mask',
+  description: 'Exfoliate gently, then finish with extra hydration.',
   steps: <RoutineStep>[
     RoutineStep(
       title: 'Superfruit Gentle Exfoliating Cleanser',
@@ -89,7 +91,8 @@ const RoutinePlan exfoliationRoutine = RoutinePlan(
 const RoutinePlan recoveryRoutine = RoutinePlan(
   kind: RoutineKind.recovery,
   title: 'Night routine',
-  description: 'Recovery night. Hydrate and support your skin barrier without actives.',
+  typeLabel: 'Recovery',
+  description: 'Hydrate and support your skin barrier without actives.',
   steps: <RoutineStep>[
     RoutineStep(
       title: 'Superfood Antioxidant Cleanser',
