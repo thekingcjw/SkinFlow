@@ -52,6 +52,17 @@ class RoutineCard extends StatelessWidget {
                               color: SkinFlowColors.primaryText,
                             ),
                       ),
+                      if (routine.typeLabel != null) ...<Widget>[
+                        const SizedBox(height: 3),
+                        Text(
+                          routine.typeLabel!,
+                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                color: accent,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                              ),
+                        ),
+                      ],
                       const SizedBox(height: 2),
                       Text(
                         routine.description,
