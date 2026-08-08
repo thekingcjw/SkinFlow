@@ -7,11 +7,13 @@ class RoutineStep {
     required this.title,
     required this.subtitle,
     required this.icon,
+    this.note,
   });
 
   final String title;
   final String subtitle;
   final IconData icon;
+  final String? note;
 }
 
 class RoutinePlan {
