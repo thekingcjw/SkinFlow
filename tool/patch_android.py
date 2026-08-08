@@ -12,6 +12,10 @@ if not app_gradle.exists():
     raise SystemExit("Run `flutter create . --platforms=android` first.")
 
 text = app_gradle.read_text()
+
+if "import java.util.Properties" not in text:
+    text = "import java.util.Properties\n\n" + text
+
 text = re.sub(r"compileSdk\s*=\s*flutter\.compileSdkVersion", "compileSdk = 36", text)
 text = re.sub(r"minSdk\s*=\s*flutter\.minSdkVersion", "minSdk = 24", text)
 
@@ -43,8 +47,10 @@ if 'create("skinflowRelease")' not in text:
     signing_block = """signingConfigs {
         val skinflowSigningPropertiesPath = System.getenv("SKINFLOW_SIGNING_PROPERTIES_PATH")
         if (!skinflowSigningPropertiesPath.isNullOrBlank()) {
-            val skinflowSigningProperties = java.util.Properties().apply {
-                file(skinflowSigningPropertiesPath!!).inputStream().use { load(it) }
+            val skinflowSigningProperties = Properties().apply {
+                file(skinflowSigningPropertiesPath).inputStream().use { input ->
+                    load(input)
+                }
             }
             create("skinflowRelease") {
                 storeFile = file(skinflowSigningProperties.getProperty("storeFile"))
