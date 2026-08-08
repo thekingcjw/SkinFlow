@@ -48,13 +48,16 @@ jobs:
           rm -f test/widget_test.dart
 
       - name: Configure permanent SkinFlow signing
-        if: ${{ secrets.SKINFLOW_KEYSTORE_B64 != '' }}
         env:
           KEYSTORE_B64: ${{ secrets.SKINFLOW_KEYSTORE_B64 }}
           STORE_PASSWORD: ${{ secrets.SKINFLOW_KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.SKINFLOW_KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.SKINFLOW_KEY_PASSWORD }}
         run: |
+          if [ -z "$KEYSTORE_B64" ] || [ -z "$STORE_PASSWORD" ] || [ -z "$KEY_ALIAS" ] || [ -z "$KEY_PASSWORD" ]; then
+            echo "Permanent SkinFlow signing secrets are not configured yet."
+            exit 0
+          fi
           echo "$KEYSTORE_B64" | base64 --decode > "$RUNNER_TEMP/skinflow-release.jks"
           {
             echo "SKINFLOW_KEYSTORE_PATH=$RUNNER_TEMP/skinflow-release.jks"
