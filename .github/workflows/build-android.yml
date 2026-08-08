@@ -51,18 +51,29 @@ jobs:
         env:
           KEYSTORE_B64: ${{ secrets.SKINFLOW_KEYSTORE_B64 }}
           STORE_PASSWORD: ${{ secrets.SKINFLOW_KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.SKINFLOW_KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.SKINFLOW_KEY_PASSWORD }}
         run: |
-          if [ -z "$KEYSTORE_B64" ] || [ -z "$STORE_PASSWORD" ] || [ -z "$KEY_ALIAS" ] || [ -z "$KEY_PASSWORD" ]; then
+          if [ -z "$KEYSTORE_B64" ] || [ -z "$STORE_PASSWORD" ] || [ -z "$KEY_PASSWORD" ]; then
             echo "Permanent SkinFlow signing secrets are not configured yet."
             exit 0
           fi
+
+          echo "::add-mask::$STORE_PASSWORD"
+          echo "::add-mask::$KEY_PASSWORD"
+
           echo "$KEYSTORE_B64" | base64 --decode > "$RUNNER_TEMP/skinflow-release.jks"
+
+          # The keystore is generated with one fixed, non-secret alias. Validate it
+          # before Gradle starts so a mistyped repository secret cannot break signing.
+          keytool -list \
+            -keystore "$RUNNER_TEMP/skinflow-release.jks" \
+            -storepass "$STORE_PASSWORD" \
+            -alias skinflow-release >/dev/null
+
           {
             echo "SKINFLOW_KEYSTORE_PATH=$RUNNER_TEMP/skinflow-release.jks"
             echo "SKINFLOW_KEYSTORE_PASSWORD=$STORE_PASSWORD"
-            echo "SKINFLOW_KEY_ALIAS=$KEY_ALIAS"
+            echo "SKINFLOW_KEY_ALIAS=skinflow-release"
             echo "SKINFLOW_KEY_PASSWORD=$KEY_PASSWORD"
           } >> "$GITHUB_ENV"
 
@@ -84,7 +95,7 @@ jobs:
       - name: Require permanent release signing
         run: |
           if [ -z "${SKINFLOW_KEYSTORE_PATH:-}" ]; then
-            echo "::error::Permanent SkinFlow release signing is not configured. Add the SKINFLOW_KEYSTORE_B64, SKINFLOW_KEYSTORE_PASSWORD, SKINFLOW_KEY_ALIAS, and SKINFLOW_KEY_PASSWORD repository secrets."
+            echo "::error::Permanent SkinFlow release signing is not configured. Add the SKINFLOW_KEYSTORE_B64, SKINFLOW_KEYSTORE_PASSWORD, and SKINFLOW_KEY_PASSWORD repository secrets."
             exit 1
           fi
 
