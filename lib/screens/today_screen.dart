@@ -128,6 +128,8 @@ class _TodayScreenState extends State<TodayScreen> {
             onChanged: (value) => _setComplete('pm', value),
           ),
           const SizedBox(height: 12),
+          const RoutineCard(routine: bodyRoutine),
+          const SizedBox(height: 12),
           const _SafetyNote(),
         ],
       ),
@@ -155,7 +157,7 @@ class _ProgressCard extends StatelessWidget {
               Row(
                 children: <Widget>[
                   const Text(
-                    'This week',
+                    'Face routines this week',
                     style: TextStyle(
                       color: SkinFlowColors.primaryText,
                       fontSize: 16,
