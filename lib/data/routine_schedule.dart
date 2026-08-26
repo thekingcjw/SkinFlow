@@ -65,7 +65,7 @@ const RoutinePlan exfoliationRoutine = RoutinePlan(
   kind: RoutineKind.exfoliation,
   title: 'Night routine',
   typeLabel: 'Exfoliation + Dream Mask',
-  description: 'Exfoliate gently, then finish with extra hydration.',
+  description: 'Exfoliate gently, replenish hydration, then finish with the overnight mask.',
   steps: <RoutineStep>[
     RoutineStep(
       title: 'Superfruit Gentle Exfoliating Cleanser',
@@ -74,10 +74,10 @@ const RoutinePlan exfoliationRoutine = RoutinePlan(
       note: 'Dime-size amount',
     ),
     RoutineStep(
-      title: 'Air-Whip Moisture Cream',
-      subtitle: 'Moisturize',
-      icon: Icons.spa_outlined,
-      note: 'Dime-size amount',
+      title: 'Superfood Skin Drip Smooth + Glow Serum',
+      subtitle: 'Hydrate',
+      icon: Icons.opacity_outlined,
+      note: '1 pump to start; increase to 2 only if desired and well tolerated',
     ),
     RoutineStep(
       title: 'Superberry Hydrate + Glow Dream Mask',
@@ -92,7 +92,7 @@ const RoutinePlan recoveryRoutine = RoutinePlan(
   kind: RoutineKind.recovery,
   title: 'Night routine',
   typeLabel: 'Recovery',
-  description: 'Hydrate and support your skin barrier without actives.',
+  description: 'Use as an irritation fallback: hydrate and support your skin barrier without actives.',
   steps: <RoutineStep>[
     RoutineStep(
       title: 'Superfood Antioxidant Cleanser',
@@ -115,18 +115,32 @@ const RoutinePlan recoveryRoutine = RoutinePlan(
   ],
 );
 
+const RoutinePlan bodyRoutine = RoutinePlan(
+  kind: RoutineKind.body,
+  title: 'Body care',
+  typeLabel: 'Daily after shower',
+  description: 'Moisturize your body while skin is still slightly damp.',
+  steps: <RoutineStep>[
+    RoutineStep(
+      title: 'Superberry Hydrate + Glow Dream Body Butter',
+      subtitle: 'Moisturize',
+      icon: Icons.self_improvement_outlined,
+      note: 'Apply a moderate layer to body, focusing on dry or rough areas',
+    ),
+  ],
+);
+
 RoutinePlan eveningRoutineForWeekday(int weekday) {
   switch (weekday) {
     case DateTime.monday:
-    case DateTime.wednesday:
-    case DateTime.friday:
-      return retinalRoutine;
     case DateTime.tuesday:
+    case DateTime.thursday:
+    case DateTime.friday:
+    case DateTime.sunday:
+      return retinalRoutine;
+    case DateTime.wednesday:
     case DateTime.saturday:
       return exfoliationRoutine;
-    case DateTime.thursday:
-    case DateTime.sunday:
-      return recoveryRoutine;
     default:
       throw ArgumentError.value(weekday, 'weekday', 'Must be 1 through 7.');
   }
