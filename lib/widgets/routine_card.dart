@@ -7,17 +7,18 @@ class RoutineCard extends StatelessWidget {
   const RoutineCard({
     super.key,
     required this.routine,
-    required this.complete,
-    required this.onChanged,
+    this.complete,
+    this.onChanged,
   });
 
   final RoutinePlan routine;
-  final bool complete;
-  final ValueChanged<bool> onChanged;
+  final bool? complete;
+  final ValueChanged<bool>? onChanged;
 
   @override
   Widget build(BuildContext context) {
     final accent = _accentFor(routine.kind);
+    final showCompletionAction = complete != null && onChanged != null;
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -81,13 +82,15 @@ class RoutineCard extends StatelessWidget {
               _StepRow(step: routine.steps[index], accent: accent),
               if (index != routine.steps.length - 1) const SizedBox(height: 12),
             ],
-            const SizedBox(height: 24),
-            Center(
-              child: FilledButton(
-                onPressed: () => onChanged(!complete),
-                child: Text(complete ? 'Completed' : 'Mark complete'),
+            if (showCompletionAction) ...<Widget>[
+              const SizedBox(height: 24),
+              Center(
+                child: FilledButton(
+                  onPressed: () => onChanged!(!complete!),
+                  child: Text(complete! ? 'Completed' : 'Mark complete'),
+                ),
               ),
-            ),
+            ],
           ],
         ),
       ),
@@ -100,6 +103,7 @@ class RoutineCard extends StatelessWidget {
       RoutineKind.retinal => SkinFlowColors.retinal,
       RoutineKind.exfoliation => SkinFlowColors.exfoliation,
       RoutineKind.recovery => SkinFlowColors.recovery,
+      RoutineKind.body => SkinFlowColors.body,
     };
   }
 
@@ -109,6 +113,7 @@ class RoutineCard extends StatelessWidget {
       RoutineKind.retinal => Icons.circle,
       RoutineKind.exfoliation => Icons.auto_awesome,
       RoutineKind.recovery => Icons.shield_outlined,
+      RoutineKind.body => Icons.self_improvement_outlined,
     };
   }
 }
