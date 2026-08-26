@@ -15,6 +15,7 @@ abstract final class SkinFlowColors {
   static const retinal = Color(0xFFD6BBFB);
   static const exfoliation = Color(0xFFF4BE8A);
   static const recovery = Color(0xFFA7D7C5);
+  static const body = Color(0xFF9FD7E5);
   static const safety = Color(0xFFF2B8B5);
   static const missed = Color(0xFF625D66);
 }
