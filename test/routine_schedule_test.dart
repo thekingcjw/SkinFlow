@@ -26,7 +26,7 @@ void main() {
     expect(recoveryRoutine.typeLabel, 'Recovery');
   });
 
-  test('recovery routine includes Skin Drip between cleanser and moisturizer', () {
+  test('recovery fallback includes Skin Drip between cleanser and moisturizer', () {
     expect(
       recoveryRoutine.steps.map((step) => step.title).toList(),
       <String>[
@@ -37,23 +37,40 @@ void main() {
     );
   });
 
-  test('Skin Drip is not scheduled on retinal or exfoliation nights', () {
-    for (final routine in <RoutinePlan>[retinalRoutine, exfoliationRoutine]) {
-      expect(
-        routine.steps.any((step) => step.title.contains('Skin Drip')),
-        isFalse,
-      );
-    }
+  test('exfoliation routine uses Skin Drip and Dream Mask without Air-Whip', () {
+    expect(
+      exfoliationRoutine.steps.map((step) => step.title).toList(),
+      <String>[
+        'Superfruit Gentle Exfoliating Cleanser',
+        'Superfood Skin Drip Smooth + Glow Serum',
+        'Superberry Hydrate + Glow Dream Mask',
+      ],
+    );
   });
 
-  test('evening weekday schedule remains MWF retinal, TuSa exfoliation, ThSu recovery', () {
+  test('Skin Drip is not scheduled on retinal nights', () {
+    expect(
+      retinalRoutine.steps.any((step) => step.title.contains('Skin Drip')),
+      isFalse,
+    );
+  });
+
+  test('weekday schedule is five retinal nights and two exfoliation nights', () {
     expect(eveningRoutineForWeekday(DateTime.monday).kind, RoutineKind.retinal);
-    expect(eveningRoutineForWeekday(DateTime.tuesday).kind, RoutineKind.exfoliation);
-    expect(eveningRoutineForWeekday(DateTime.wednesday).kind, RoutineKind.retinal);
-    expect(eveningRoutineForWeekday(DateTime.thursday).kind, RoutineKind.recovery);
+    expect(eveningRoutineForWeekday(DateTime.tuesday).kind, RoutineKind.retinal);
+    expect(eveningRoutineForWeekday(DateTime.wednesday).kind, RoutineKind.exfoliation);
+    expect(eveningRoutineForWeekday(DateTime.thursday).kind, RoutineKind.retinal);
     expect(eveningRoutineForWeekday(DateTime.friday).kind, RoutineKind.retinal);
     expect(eveningRoutineForWeekday(DateTime.saturday).kind, RoutineKind.exfoliation);
-    expect(eveningRoutineForWeekday(DateTime.sunday).kind, RoutineKind.recovery);
+    expect(eveningRoutineForWeekday(DateTime.sunday).kind, RoutineKind.retinal);
+  });
+
+  test('recovery remains a fallback and is not part of the weekly schedule', () {
+    for (var weekday = DateTime.monday;
+        weekday <= DateTime.sunday;
+        weekday++) {
+      expect(eveningRoutineForWeekday(weekday).kind, isNot(RoutineKind.recovery));
+    }
   });
 
   test('retinal and exfoliating cleanser are never scheduled together', () {
@@ -83,6 +100,16 @@ void main() {
     }
   });
 
+  test('body care is a daily informational routine with Body Butter', () {
+    expect(bodyRoutine.kind, RoutineKind.body);
+    expect(bodyRoutine.typeLabel, 'Daily after shower');
+    expect(bodyRoutine.steps.length, 1);
+    expect(
+      bodyRoutine.steps.single.title,
+      'Superberry Hydrate + Glow Dream Body Butter',
+    );
+  });
+
   test('routine step notes preserve the recommended starting amounts', () {
     expect(morningRoutine.steps[0].note, '1–2 pumps');
     expect(
@@ -99,6 +126,10 @@ void main() {
       'Pea-size for the whole face; apply as a thin film',
     );
     expect(exfoliationRoutine.steps[0].note, 'Dime-size amount');
+    expect(
+      exfoliationRoutine.steps[1].note,
+      '1 pump to start; increase to 2 only if desired and well tolerated',
+    );
     expect(
       exfoliationRoutine.steps[2].note,
       'Nickel-size amount / thin even layer',
