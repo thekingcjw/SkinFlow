@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-enum RoutineKind { morning, retinal, exfoliation, recovery }
+enum RoutineKind { morning, retinal, exfoliation, recovery, body }
 
 class RoutineStep {
   const RoutineStep({
