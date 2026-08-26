@@ -19,7 +19,7 @@ class WeekScreen extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          'Morning is the same every day. Evening changes by day.',
+          'Morning and body care are the same every day. Night routine changes by day.',
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
@@ -54,7 +54,7 @@ class _DayTile extends StatelessWidget {
           weekdayName(weekday),
           style: const TextStyle(fontWeight: FontWeight.w700),
         ),
-        subtitle: Text(routine.title),
+        subtitle: Text(routine.typeLabel ?? routine.title),
         childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         children: <Widget>[
           for (final step in routine.steps)
@@ -65,6 +65,14 @@ class _DayTile extends StatelessWidget {
               title: Text(step.title),
               subtitle: Text(step.subtitle),
             ),
+          const Divider(),
+          ListTile(
+            dense: true,
+            contentPadding: EdgeInsets.zero,
+            leading: Icon(bodyRoutine.steps.first.icon),
+            title: Text(bodyRoutine.steps.first.title),
+            subtitle: const Text('Body care · Daily after shower'),
+          ),
         ],
       ),
     );
