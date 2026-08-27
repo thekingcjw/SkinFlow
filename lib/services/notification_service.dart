@@ -41,8 +41,10 @@ class NotificationService {
   }
 
   Future<bool> requestPermission() async {
-    final android = _plugin.resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>();
+    final android = _plugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
     return await android?.requestNotificationsPermission() ?? true;
   }
 
@@ -63,13 +65,15 @@ class NotificationService {
     }
 
     if (settings.eveningEnabled) {
-      for (var weekday = DateTime.monday;
-          weekday <= DateTime.sunday;
-          weekday++) {
+      for (
+        var weekday = DateTime.monday;
+        weekday <= DateTime.sunday;
+        weekday++
+      ) {
         final routine = eveningRoutineForWeekday(weekday);
         await _plugin.zonedSchedule(
           id: 2000 + weekday,
-          title: '${weekdayName(weekday)} — ${routine.title}',
+          title: eveningNotificationTitle(weekday),
           body: compactNotificationBody(routine),
           scheduledDate: _nextWeekday(weekday, settings.eveningTime),
           notificationDetails: _details,
@@ -108,9 +112,7 @@ class NotificationService {
   Future<void> _cancelRoutineNotifications() async {
     await _plugin.cancel(id: 1000);
     await _plugin.cancel(id: 3000);
-    for (var weekday = DateTime.monday;
-        weekday <= DateTime.sunday;
-        weekday++) {
+    for (var weekday = DateTime.monday; weekday <= DateTime.sunday; weekday++) {
       await _plugin.cancel(id: 2000 + weekday);
     }
   }

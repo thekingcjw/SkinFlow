@@ -4,7 +4,8 @@ import '../models/routine.dart';
 
 const RoutinePlan morningRoutine = RoutinePlan(
   kind: RoutineKind.morning,
-  title: 'Morning routine',
+  title: 'Morning Routine',
+  typeLabel: 'Morning Routine',
   description: 'Cleanse, hydrate, moisturize, and protect.',
   steps: <RoutineStep>[
     RoutineStep(
@@ -36,8 +37,8 @@ const RoutinePlan morningRoutine = RoutinePlan(
 
 const RoutinePlan retinalRoutine = RoutinePlan(
   kind: RoutineKind.retinal,
-  title: 'Night routine',
-  typeLabel: 'Retinal',
+  title: 'Retinal Night',
+  typeLabel: 'Retinal Night',
   description: 'Skin-renewal night. Keep the routine simple.',
   steps: <RoutineStep>[
     RoutineStep(
@@ -63,9 +64,10 @@ const RoutinePlan retinalRoutine = RoutinePlan(
 
 const RoutinePlan exfoliationRoutine = RoutinePlan(
   kind: RoutineKind.exfoliation,
-  title: 'Night routine',
-  typeLabel: 'Exfoliation + Dream Mask',
-  description: 'Exfoliate gently, replenish hydration, then finish with the overnight mask.',
+  title: 'Exfoliation Night',
+  typeLabel: 'Exfoliation Night',
+  description:
+      'Exfoliate gently, replenish hydration, then finish with the overnight mask.',
   steps: <RoutineStep>[
     RoutineStep(
       title: 'Superfruit Gentle Exfoliating Cleanser',
@@ -90,9 +92,10 @@ const RoutinePlan exfoliationRoutine = RoutinePlan(
 
 const RoutinePlan recoveryRoutine = RoutinePlan(
   kind: RoutineKind.recovery,
-  title: 'Night routine',
-  typeLabel: 'Recovery',
-  description: 'Use as an irritation fallback: hydrate and support your skin barrier without actives.',
+  title: 'Recovery Night',
+  typeLabel: 'Recovery Night',
+  description:
+      'Use as an irritation fallback: hydrate and support your skin barrier without actives.',
   steps: <RoutineStep>[
     RoutineStep(
       title: 'Superfood Antioxidant Cleanser',
@@ -117,8 +120,8 @@ const RoutinePlan recoveryRoutine = RoutinePlan(
 
 const RoutinePlan bodyRoutine = RoutinePlan(
   kind: RoutineKind.body,
-  title: 'Body care',
-  typeLabel: 'Daily after shower',
+  title: 'Daily Body Care',
+  typeLabel: 'Daily · Not counted',
   description: 'Moisturize your body while skin is still slightly damp.',
   steps: <RoutineStep>[
     RoutineStep(
@@ -161,4 +164,9 @@ String weekdayName(int weekday) {
 
 String compactNotificationBody(RoutinePlan routine) {
   return routine.steps.map((step) => step.subtitle).join(' → ');
+}
+
+String eveningNotificationTitle(int weekday) {
+  final routine = eveningRoutineForWeekday(weekday);
+  return '${weekdayName(weekday)} — ${routine.displayLabel}';
 }

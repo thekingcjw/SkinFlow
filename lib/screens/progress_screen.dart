@@ -67,11 +67,12 @@ class _ProgressScreenState extends State<ProgressScreen> {
         }
 
         final records = snapshot.data!;
-        if (records.isEmpty) {
+        if (!hasCompletedSessions(records)) {
           return const _ProgressStateCard(
             icon: Icons.auto_awesome_outlined,
             title: 'Your progress starts here',
-            body: 'Complete a morning or evening routine to begin building your history.',
+            body:
+                'Complete Morning Routine or tonight’s named face routine to begin. Daily Body Care is not counted.',
           );
         }
 
@@ -81,10 +82,10 @@ class _ProgressScreenState extends State<ProgressScreen> {
             Text(
               'Progress',
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    color: SkinFlowColors.primaryText,
-                    fontSize: 28,
-                    fontWeight: FontWeight.w500,
-                  ),
+                color: SkinFlowColors.primaryText,
+                fontSize: 28,
+                fontWeight: FontWeight.w500,
+              ),
             ),
             const SizedBox(height: 4),
             Text(
@@ -151,7 +152,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
       case _ProgressView.calendar:
         return 'Your routine history, day by day.';
       case _ProgressView.week:
-        return '14 sessions. One clear weekly view.';
+        return '14 face sessions. Daily Body Care is not counted.';
       case _ProgressView.streak:
         return 'Build consistency one full day at a time.';
     }
@@ -469,7 +470,10 @@ class _WeekView extends StatelessWidget {
               runSpacing: 8,
               children: <Widget>[
                 for (final day in days)
-                  SizedBox(width: width, child: _WeekDayCard(day: day)),
+                  SizedBox(
+                    width: width,
+                    child: _WeekDayCard(day: day),
+                  ),
               ],
             );
           },

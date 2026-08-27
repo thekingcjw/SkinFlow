@@ -6,6 +6,23 @@ CompletionRecord record(DateTime day, String period, {bool complete = true}) =>
     CompletionRecord(day: day, period: period, complete: complete);
 
 void main() {
+  test('session totals ignore stored incomplete rows', () {
+    final records = <CompletionRecord>[
+      record(DateTime(2026, 8, 4), 'am'),
+      record(DateTime(2026, 8, 4), 'pm', complete: false),
+      record(DateTime(2026, 8, 5), 'am'),
+    ];
+
+    expect(countCompletedSessions(records), 2);
+    expect(hasCompletedSessions(records), isTrue);
+    expect(
+      hasCompletedSessions(<CompletionRecord>[
+        record(DateTime(2026, 8, 4), 'pm', complete: false),
+      ]),
+      isFalse,
+    );
+  });
+
   test('calendar classifies complete partial missed and pending days', () {
     final today = DateTime(2026, 8, 7);
     final progress = buildDayProgress(

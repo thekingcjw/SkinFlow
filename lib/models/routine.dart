@@ -30,4 +30,15 @@ class RoutinePlan {
   final String? typeLabel;
   final String description;
   final List<RoutineStep> steps;
+
+  /// The canonical, user-facing routine name used outside the full card.
+  ///
+  /// Keeping this tied to [title] prevents compact surfaces such as the
+  /// weekly schedule and notifications from falling back to a generic
+  /// "Night routine" label.
+  String get displayLabel => title;
+
+  /// Body care is useful routine context, but it is deliberately excluded
+  /// from the weekly face-routine denominator (7 mornings + 7 evenings).
+  bool get countsTowardFaceProgress => kind != RoutineKind.body;
 }

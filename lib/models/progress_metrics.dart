@@ -39,7 +39,14 @@ class StreakMetrics {
   }
 }
 
-DateTime dayOnly(DateTime value) => DateTime(value.year, value.month, value.day);
+DateTime dayOnly(DateTime value) =>
+    DateTime(value.year, value.month, value.day);
+
+int countCompletedSessions(Iterable<CompletionRecord> records) =>
+    records.where((record) => record.complete).length;
+
+bool hasCompletedSessions(Iterable<CompletionRecord> records) =>
+    records.any((record) => record.complete);
 
 Map<DateTime, DayProgress> buildDayProgress(
   Iterable<CompletionRecord> records, {
@@ -51,7 +58,9 @@ Map<DateTime, DayProgress> buildDayProgress(
   final completion = <DateTime, Set<String>>{};
   for (final record in records) {
     if (!record.complete) continue;
-    completion.putIfAbsent(dayOnly(record.day), () => <String>{}).add(record.period);
+    completion
+        .putIfAbsent(dayOnly(record.day), () => <String>{})
+        .add(record.period);
   }
 
   final result = <DateTime, DayProgress>{};
