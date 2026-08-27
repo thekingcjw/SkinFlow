@@ -13,21 +13,23 @@ class WeekScreen extends StatelessWidget {
       children: <Widget>[
         Text(
           'Weekly schedule',
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.w800,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800),
         ),
         const SizedBox(height: 4),
         Text(
-          'Morning is the same every day. Evening changes by day.',
+          'Morning Routine and Daily Body Care stay consistent. The evening card is Retinal Night or Exfoliation Night.',
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
         const SizedBox(height: 16),
-        for (var weekday = DateTime.monday;
-            weekday <= DateTime.sunday;
-            weekday++)
+        for (
+          var weekday = DateTime.monday;
+          weekday <= DateTime.sunday;
+          weekday++
+        )
           _DayTile(
             weekday: weekday,
             routine: eveningRoutineForWeekday(weekday),
@@ -54,7 +56,7 @@ class _DayTile extends StatelessWidget {
           weekdayName(weekday),
           style: const TextStyle(fontWeight: FontWeight.w700),
         ),
-        subtitle: Text(routine.title),
+        subtitle: Text(routine.displayLabel),
         childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         children: <Widget>[
           for (final step in routine.steps)
@@ -65,6 +67,14 @@ class _DayTile extends StatelessWidget {
               title: Text(step.title),
               subtitle: Text(step.subtitle),
             ),
+          const Divider(),
+          ListTile(
+            dense: true,
+            contentPadding: EdgeInsets.zero,
+            leading: Icon(bodyRoutine.steps.first.icon),
+            title: Text(bodyRoutine.steps.first.title),
+            subtitle: const Text('Daily Body Care · Not counted'),
+          ),
         ],
       ),
     );
